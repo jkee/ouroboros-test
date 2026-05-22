@@ -76,34 +76,49 @@ def _save_markdown(records: list[dict]) -> None:
 
 
 def _format_record(r: dict) -> str:
-    t = r.get("type", "?")
-    name = r.get("airline") or r.get("hotel_name") or r.get("carrier") or "?"
-    route = r.get("route") or r.get("location") or "?"
+    t = r.get("type", "")
+    name = r.get("airline") or r.get("hotel_name") or r.get("carrier") or ""
+    route = r.get("route") or r.get("location") or ""
     ref = r.get("booking_reference") or r.get("pnr") or ""
     passengers = r.get("passengers") or r.get("guests") or []
     if isinstance(passengers, list):
-        pax = ", ".join(passengers) if passengers else "?"
+        pax = ", ".join(passengers) if passengers else ""
     else:
         pax = str(passengers)
 
+    ref_str = f" · Ref: {ref}" if ref else ""
+
     if t == "flight":
-        dep = r.get("departure") or "?"
-        arr = r.get("arrival") or "?"
-        ref_str = f" · Ref: {ref}" if ref else ""
-        return f"**{name}** {route} · Dep: {dep} · Arr: {arr} · Pax: {pax}{ref_str}"
+        dep = r.get("departure") or ""
+        arr = r.get("arrival") or ""
+        parts = [f"**{name}**" if name else "**unknown**"]
+        if route: parts.append(route)
+        if dep: parts.append(f"Dep: {dep}")
+        if arr: parts.append(f"Arr: {arr}")
+        if pax: parts.append(f"Pax: {pax}")
+        return " · ".join(parts) + ref_str
     elif t == "hotel":
-        ci = r.get("checkin") or "?"
-        co = r.get("checkout") or "?"
-        ref_str = f" · Ref: {ref}" if ref else ""
-        return f"**{name}** {route} · Check-in: {ci} · Check-out: {co} · Guests: {pax}{ref_str}"
+        ci = r.get("checkin") or ""
+        co = r.get("checkout") or ""
+        parts = [f"**{name}**" if name else "**unknown**"]
+        if route: parts.append(route)
+        if ci: parts.append(f"Check-in: {ci}")
+        if co: parts.append(f"Check-out: {co}")
+        if pax: parts.append(f"Guests: {pax}")
+        return " · ".join(parts) + ref_str
     elif t == "train":
-        dep = r.get("departure") or "?"
-        arr = r.get("arrival") or "?"
-        ref_str = f" · Ref: {ref}" if ref else ""
-        return f"**{name}** {route} · Dep: {dep} · Arr: {arr} · Pax: {pax}{ref_str}"
+        dep = r.get("departure") or ""
+        arr = r.get("arrival") or ""
+        parts = [f"**{name}**" if name else "**unknown**"]
+        if route: parts.append(route)
+        if dep: parts.append(f"Dep: {dep}")
+        if arr: parts.append(f"Arr: {arr}")
+        if pax: parts.append(f"Pax: {pax}")
+        return " · ".join(parts) + ref_str
     else:
-        ref_str = f" · Ref: {ref}" if ref else ""
-        return f"**{name}** {route}{ref_str}"
+        parts = [f"**{name}**" if name else "**unknown**"]
+        if route: parts.append(route)
+        return " · ".join(parts) + ref_str
 
 
 # ---------------------------------------------------------------------------
