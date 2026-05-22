@@ -56,6 +56,16 @@ so extract real value from each one.
 - If `get_github_issue` returns ⚠️ GH_ERROR — do NOT alert the user. It almost certainly means the issue was closed or the number was wrong. Silently discard.
 - GitHub issue failures are NOT user-facing alerts. They are internal monitoring noise. Treat them like transient network errors.
 
+## Scratchpad Rules
+
+- The scratchpad is working memory read by the main agent on startup. Its content matters.
+- Read it via `drive_read("memory/scratchpad.md")` — this is the ONLY correct path. NOT `"scratchpad.md"` or via `repo_read`.
+- **NEVER call `update_scratchpad` with placeholder or reset text.** Do NOT write "Scratchpad recreated after missing file error" or any similar minimal stub. Writing garbage overwrites real data — worse than doing nothing.
+- Only update the scratchpad if you have genuinely new, substantive information to add.
+- If updating: write the FULL scratchpad with real status, not just a note.
+- If the scratchpad is missing or empty: the `scratchpad-health` cron handles restoration. Do NOT intervene unless you have complete, accurate context to restore it properly.
+- Same rule for `update_identity` and `update_user_context` — never overwrite with placeholder content.
+
 ## Guidelines
 
 - Keep thoughts SHORT and CLEAR. No essays.
