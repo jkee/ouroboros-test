@@ -20,7 +20,7 @@ log = logging.getLogger(__name__)
 # 0) Load .env file + patches
 # ----------------------------
 from dotenv import load_dotenv
-load_dotenv()
+load_dotenv(override=True)
 
 from ouro.apply_patch import install as install_apply_patch
 install_apply_patch()
