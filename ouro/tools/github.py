@@ -5,6 +5,7 @@ from __future__ import annotations
 import json
 import logging
 import os
+import pathlib
 import subprocess
 from typing import Any, Dict, List, Optional
 
@@ -16,10 +17,30 @@ log = logging.getLogger(__name__)
 # Helpers
 # ---------------------------------------------------------------------------
 
+
+
+def _get_fresh_github_token() -> str:
+    """Read GITHUB_TOKEN fresh from .env file to avoid stale process env after token rotation."""
+    env_path = pathlib.Path("/app/.env")
+    try:
+        for line in env_path.read_text().splitlines():
+            line = line.strip()
+            if line.startswith("GITHUB_TOKEN="):
+                return line.split("=", 1)[1].strip().strip('"').strip("'")
+    except Exception:
+        pass
+    return os.environ.get("GITHUB_TOKEN", "")
+
 def _gh_cmd(args: List[str], ctx: ToolContext, timeout: int = 30, input_data: Optional[str] = None) -> str:
     """Run `gh` CLI command and return stdout or error string."""
     cmd = ["gh"] + args
     try:
+        # Always read token fresh from .env to avoid stale process env after token rotation
+        token = _get_fresh_github_token()
+        env = os.environ.copy()
+        if token:
+            env["GH_TOKEN"] = token
+            env["GITHUB_TOKEN"] = token
         res = subprocess.run(
             cmd,
             cwd=str(ctx.repo_dir),
@@ -27,6 +48,7 @@ def _gh_cmd(args: List[str], ctx: ToolContext, timeout: int = 30, input_data: Op
             text=True,
             timeout=timeout,
             input=input_data,
+            env=env,
         )
         if res.returncode != 0:
             err = (res.stderr or "").strip()

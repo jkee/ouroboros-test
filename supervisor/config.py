@@ -155,6 +155,8 @@ class Config:
         os.environ["OURO_DIAG_SLOW_CYCLE_SEC"] = str(self.diag_slow_cycle_sec)
         os.environ["TELEGRAM_BOT_TOKEN"] = self.telegram_bot_token
         os.environ["OURO_BRANCH_PREFIX"] = self.branch_prefix
+        os.environ["GITHUB_TOKEN"] = self.github_token
+        os.environ["GH_TOKEN"] = self.github_token  # gh CLI prefers GH_TOKEN over GITHUB_TOKEN
 
     def ensure_directories(self) -> None:
         """Create required data directories."""
