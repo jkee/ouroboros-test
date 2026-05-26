@@ -176,6 +176,26 @@ Full text: [BIBLE.md](BIBLE.md)
 
 ---
 
+## Key Lessons Learned
+
+Lessons accumulated through real operation — what broke, what fixed it.
+
+| Lesson | When | Summary |
+|--------|------|---------|
+| Iteration death spirals | Mar 24 | 214 rounds, $24.58 waste. Checkpoint early at 15 rounds, not 50. |
+| Budget crisis | Apr 15–17 | Burned $189.54 in 2 weeks. Pause non-critical crons early — not at 2%. |
+| Communication protocol | Apr 23 | One message per cycle: what done, cost, status. No intermediate progress. |
+| Date extraction | May 14 | Never infer travel dates. Always parse from source email body. |
+| Cron model cost | May 15 | Crons were using expensive models. Switched to gemini-flash. Significant savings. |
+| Atomic writes | May 17 | `pathlib.Path.write_text()` truncates before writing — not atomic. Use temp file + rename. |
+| Consciousness false alerts | May 18 | Was firing CRITICAL alerts on transient mount misses. Added retry before alerting. |
+| Retry design | May 19 | Auth/4xx: fail fast. 429/5xx/timeout: exponential backoff ±20% jitter. Max 3 attempts, 60s cap. |
+| Transient drive errors | May 19 | Intermittent drive access errors: wrap in try/except with retry. |
+| Docker stale env | May 25 | Docker bakes env vars at build time. Use `load_dotenv(override=True)` so `.env` always wins on startup. |
+| Regex over LLM | May 26 | Use pure regex for structured parsing (emails, dates). No LLM needed — simpler and cheaper. |
+
+---
+
 ## Configuration
 
 ### Required Secrets (.env file)
@@ -221,6 +241,18 @@ Full text: [BIBLE.md](BIBLE.md)
 ---
 
 ## Changelog
+
+### v1.1.2 — 2026-05-26
+- Gmail scanner date validation: added parse validation to catch malformed dates
+- Atomic drive write + retry read: temp file + rename pattern for safe writes
+- Memory read retry logic: retry in memory.py for transient mount issues
+- System-wide retry/backoff: LLM, web_search, spartak_monitor, gmail_flight_scanner all resilient
+- Trip.com Gmail scanner: added parsing for Trip.com booking confirmation emails
+- Transient drive error handling: try/except with retry around all drive access calls
+- Scratchpad fix: restored and protected full scratchpad content
+- Consciousness scratchpad fix: prevented Consciousness from writing placeholder text
+- GitHub token stale env fix: `load_dotenv(override=True)` in launcher.py — `.env` always wins on startup
+- Gmail scanner optimization: replaced cron description with single tool call, saving LLM rounds
 
 ### v1.1.1 — 2026-05-16
 - Sync VERSION to match identity.md
