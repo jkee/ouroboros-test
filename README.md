@@ -242,6 +242,12 @@ Lessons accumulated through real operation — what broke, what fixed it.
 
 ## Changelog
 
+### v1.1.3 — 2026-05-27
+- Scratchpad health cron: refreshes live data each run
+- Gmail scanner optimization: single tool call replaces multi-round LLM cron description
+- Identity version sync: corrected VERSION file to match identity.md (1.1.2 → 1.1.3)
+- SYSTEM.md placeholder fix: resolved two literal {branch_dev} placeholders in prompts
+
 ### v1.1.2 — 2026-05-26
 - Gmail scanner date validation: added parse validation to catch malformed dates
 - Atomic drive write + retry read: temp file + rename pattern for safe writes
