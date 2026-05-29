@@ -676,11 +676,25 @@ def compact_tool_history(messages: list, keep_recent: int = 6) -> list:
     rounds_to_compact = set(tool_round_starts[:-keep_recent])
 
     # Build compacted message list
+    # Find the last checkpoint system message index (to deduplicate stale checkpoints)
+    last_checkpoint_idx = None
+    for i, msg in enumerate(messages):
+        if (msg.get("role") == "system"
+                and isinstance(msg.get("content"), str)
+                and "[CHECKPOINT" in msg.get("content", "")):
+            last_checkpoint_idx = i
+
     result = []
     for i, msg in enumerate(messages):
         # Skip system messages with multipart content (prompt caching format)
         if msg.get("role") == "system" and isinstance(msg.get("content"), list):
             result.append(msg)
+            continue
+        # Drop stale checkpoint messages — keep only the last one
+        if (msg.get("role") == "system"
+                and isinstance(msg.get("content"), str)
+                and "[CHECKPOINT" in msg.get("content", "")
+                and i != last_checkpoint_idx):
             continue
 
         if msg.get("role") == "tool" and i > 0:
