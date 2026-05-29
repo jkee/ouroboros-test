@@ -1,0 +1,74 @@
+{
+  "crons": [
+    {
+      "id": "e43092ef",
+      "expression": "0 7 * * 1",
+      "description": "Weekly AI conferences monitor. Search for upcoming applied AI conferences in Europe, UK, Saudi Arabia, UAE, and Asia (excl. China — Singapore, Thailand, Thailand, Japan, Korea, India OK). Topics: AI agents, robotics/embodied AI, AI software engineering, applied LLMs. Filter: no pure marketing/expo fluff, prefer technical/practitioner events. Format: brief list with name, city, date, why it's interesting. Compare against previous report (knowledge base: ai-conferences-watch) to highlight what's new vs already reported. Send to user via send_owner_message. Update knowledge base with new findings.",
+      "enabled": true,
+      "notify": true,
+      "created_at": "2026-04-02T09:14:20.580657+00:00",
+      "last_fired_at": "2026-05-25T07:00:00.398790+00:00",
+      "last_task_id": "a550e6f2",
+      "fire_count": 8
+    },
+    {
+      "id": "8e63b12c",
+      "expression": "0 * * * *",
+      "description": "Call scan_gmail_flights tool. Silent — no output unless a new booking was appended.",
+      "enabled": true,
+      "notify": false,
+      "created_at": "2026-04-02T09:21:50.497443+00:00",
+      "last_fired_at": "2026-05-27T22:00:03.211213+00:00",
+      "last_task_id": "a5f9b990",
+      "fire_count": 1179,
+      "resumed_at": "2026-05-15T13:30:00.000000+00:00",
+      "resume_reason": "Budget refilled ($144.92 remaining). Resuming all paused crons."
+    },
+    {
+      "id": "561db1c6",
+      "expression": "0 5 * * 3",
+      "description": "Weekly robotics reading digest — top 3 articles. SEND result to user via send_owner_message.\n\nSOURCES to check (in priority order):\n1. Weekly Robotics: browse https://weeklyrobotics.com — grab latest issue, find top picks\n2. IEEE Spectrum Robotics: browse https://spectrum.ieee.org/topic/robotics — articles from last 7 days\n3. BAIR Blog: browse https://bair.berkeley.edu/blog — posts from last 7 days\n4. Boston Dynamics blog: browse https://bostondynamics.com/blog — latest posts\n5. Figure AI news: browse https://figure.ai/news — latest posts\n6. NVIDIA Robotics blog: https://developer.nvidia.com/blog/category/robotics/ — last 7 days\n7. Agility Robotics: https://agilityrobotics.com/blog\n\nDEDUP: Read /data/robotics_sent.json (list of sent URLs). Skip any URL already in this list.\n\nSELECTION RULES:\n- Pick TOP 3 articles from last 7 days across all sources\n- Prioritize: technical depth, actual deployments, hardware insights, sim-to-real, manipulation research\n- Skip: press releases, funding-only news, pure demos with no substance\n- Robot Report excluded (user gets it via email) UNLESS truly exceptional\n- If fewer than 3 fresh articles found — send what exists (1-2 is fine), skip week entirely if nothing\n\nFORMAT for send_owner_message:\nRobotics week {ISO week}\n\n1. **[Article Title]** — {Source}\n   {1-2 sentences: what is technically interesting, why it matters}\n   {URL}\n\nAFTER SENDING: Append sent URLs to /data/robotics_sent.json (create if missing).",
+      "enabled": true,
+      "notify": true,
+      "created_at": "2026-04-07T11:40:27.760327+00:00",
+      "last_fired_at": "2026-05-27T05:00:09.286506+00:00",
+      "last_task_id": "3256c76e",
+      "fire_count": 8,
+      "resumed_at": "2026-05-15T13:30:00.000000+00:00",
+      "resume_reason": "Budget refilled ($144.92 remaining). Resuming all paused crons."
+    },
+    {
+      "id": "spartak-matches",
+      "expression": "0 7 1,15 * *",
+      "description": "Spartak Moscow match monitor — biweekly schedule report.\n\nUse the check_spartak_matches tool (send_telegram=true) to fetch and send upcoming Spartak Moscow matches to the user.\n\nThe tool will:\n- Scrape https://www.sports.ru/football/club/spartak/calendar/\n- Show upcoming home and away matches\n- Send the formatted message directly to Telegram\n\nSILENT: do NOT send any progress messages. Just call check_spartak_matches and finish.",
+      "enabled": true,
+      "notify": false,
+      "created_at": "2026-05-11T22:34:26.000000+00:00",
+      "last_fired_at": "2026-05-15T13:32:02.530907+00:00",
+      "last_task_id": "54af3f0f",
+      "fire_count": 1
+    },
+    {
+      "id": "2f291f0e",
+      "expression": "0 3 * * 1",
+      "description": "Run run_data_cleanup to remove stale files from /data/ — temp files, old task results (>14d), orphan scripts, stale logs.",
+      "enabled": true,
+      "notify": false,
+      "created_at": "2026-05-14T06:18:19.867071+00:00",
+      "last_fired_at": "2026-05-25T03:00:06.532845+00:00",
+      "last_task_id": "aab648d7",
+      "fire_count": 2
+    },
+    {
+      "id": "scratchpad-health",
+      "expression": "0 6 * * *",
+      "description": "Daily scratchpad refresh + health check + USER_CONTEXT update. ALWAYS runs — silent unless a problem is found.\n\nSTEP 1 — HEALTH CHECK\nRead /data/memory/scratchpad.md. Checks:\n1. File exists and is readable\n2. Total character count > 200 (not trivially populated)\n3. Contains at least one meaningful section with real content (non-empty bullet line or paragraph >50 chars)\n\nDefinition of HEALTHY: char count > 200 AND at least one non-empty bullet line (starts with - or *) or paragraph with >50 chars.\n\nIf ANY check fails → call send_owner_message with:\n  ⚠️ Scratchpad health check failed\n  - Which check failed\n  - Current scratchpad character count\n  - First 200 chars of content\n\nSTEP 2 — REFRESH LIVE DATA (always, even if healthy)\nRead /data/crons.json and note fire_count and last_fired_at for each cron.\nCurrent budget and UTC time are in your ## Runtime context section.\nDO NOT read any state files (state/state.json, state.json, state/drive_state.json, etc.) — all needed data is already in the runtime context above.\n\nCall update_scratchpad with the FULL updated content. Preserve all non-volatile sections verbatim (GitHub Token Fix notes, Notes section, User Context section). Only update these dynamic sections:\n\nUpdatedAt: replace with current UTC time\n\n## Status\nRewrite all bullet lines with fresh values:\n- Gmail scanner: RUNNING (hourly cron, last fired {last_fired_at for id=8e63b12c from crons.json}, fire_count={fire_count})\n- GitHub token: FIXED AND VERIFIED — load_dotenv(override=True) patch works, gh auth confirms login\n- git remote: working, ls-remote responds correctly\n- All crons running: AI Conferences (Mon 07:00 UTC), Robotics Digest (Wed 05:00 UTC), Spartak monitor (1st+15th 10:00 MSK), Gmail scanner (hourly)\n- ⏸️ Spartak tickets monitor: paused (user requested)\n- 💰 Budget: {remaining_usd from runtime context} remaining ({total_usd} total)\n- ✈️ User travel: [reflect current/upcoming travel from USER_CONTEXT.md or leave blank if none]\n- 🇷🇺 Russia days: [update if known, otherwise preserve last value]\n- 🇪🇺 Schengen: [update if known, otherwise preserve last value]\n\n## Health Invariants\nRewrite with current values:\n- ✅ GitHub token: FIXED AND WORKING\n- ✅ Budget: {remaining_usd} remaining\n- ✅ No high-cost tasks\n- ✅ No duplicate processing\n\n## Runtime\nRewrite with current values:\nUTC: {current UTC from runtime context}\nBudget remaining: {remaining_usd} / {total_usd}\n\nSTEP 3 — UPDATE USER_CONTEXT.md (always)\nRead the current /data/memory/USER_CONTEXT.md.\nUpdate it to reflect any changes since the last run. Keep it under 1000 characters. Focus on:\n- Current/upcoming travel (check flights.json for next bookings if relevant)\n- Budget status (remaining_usd from runtime context)\n- Days tracker: Schengen and Russia day counts if they've changed\n- Remove outdated items (past trips, past deadlines)\n- Preserve stable facts (language, preferences, VPS IP, Spartak interest, ICML registration)\n\nCall update_user_context with the refreshed content.\n\nSILENT — do NOT send any message if everything is healthy and all updates succeed.",
+      "enabled": true,
+      "notify": false,
+      "created_at": "2026-05-22T09:23:00.000000+00:00",
+      "last_fired_at": "2026-05-27T06:00:01.495974+00:00",
+      "last_task_id": "c8665c84",
+      "fire_count": 5
+    }
+  ]
+}
