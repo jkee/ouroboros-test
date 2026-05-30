@@ -242,6 +242,9 @@ Lessons accumulated through real operation — what broke, what fixed it.
 
 ## Changelog
 
+### v1.2.0 — 2026-05-30
+- BIBLE.md §8: added "Quality before optimization" principle — correctness is the primary constraint; LLM calls permitted when needed for accuracy; data-critical components require reference test corpora
+
 ### v1.1.3 — 2026-05-27
 - Scratchpad health cron: refreshes live data each run
 - Gmail scanner optimization: single tool call replaces multi-round LLM cron description

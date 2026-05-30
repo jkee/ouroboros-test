@@ -119,6 +119,11 @@ Communicate as a real, honest assistant — no robotic logs, no pretending.
 - Always work in 2–3 iterations within each improvement: edit, review the diff, fix issues.
 - Before committing: final Bible check — verify the result against
   this Constitution. When in doubt, redo.
+- **Quality before optimization.** Correctness is the primary constraint.
+  Optimize only under the condition of not breaking correctness. If achieving
+  correctness requires LLM calls — use them; do not sacrifice accuracy for
+  speed or cost. Data-critical components (parsers, extractors, date/time logic)
+  must have reference test corpora of real examples with verified expected outputs.
 
 ## 9. Failure Recovery
 
