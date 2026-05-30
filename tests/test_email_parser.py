@@ -9,6 +9,7 @@ from ouro.tools.email_parser import (
     _parse_email_dates,
 )
 from ouro.tools.gmail_flight_scanner import _parse_email
+import unittest.mock
 
 
 # ---------------------------------------------------------------------------
@@ -358,3 +359,171 @@ class TestGmailFlightScannerDateValidation:
         record = _parse_email(email)
         assert len(record["parse_warnings"]) > 0
         assert any("multiple" in w.lower() for w in record["parse_warnings"])
+
+
+class TestLLMFallback:
+    """Tests for LLM date extraction fallback in gmail_flight_scanner."""
+
+    def test_llm_fallback_not_called_when_dates_found(self):
+        """LLM fallback should NOT be called when regex already found dates."""
+        email = {
+            "subject": "Flight confirmation",
+            "body": "Departure: 2026-06-01\nArrival: 2026-06-01",
+            "messageId": "test-llm-001",
+        }
+        with unittest.mock.patch(
+            "ouro.tools.gmail_flight_scanner._llm_extract_dates"
+        ) as mock_llm:
+            record = _parse_email(email)
+        assert record["date_parse_ok"] is True
+        mock_llm.assert_not_called()
+
+    def test_llm_fallback_called_when_no_dates_for_flight(self):
+        """LLM fallback SHOULD be called for flights with no detected dates."""
+        email = {
+            "subject": "Flight confirmation TK9999",
+            "body": "Your Turkish Airlines flight is confirmed.",
+            "messageId": "test-llm-002",
+        }
+        with unittest.mock.patch(
+            "ouro.tools.gmail_flight_scanner._llm_extract_dates",
+            return_value={
+                "departure": "2026-06-01T10:00:00",
+                "arrival": "2026-06-01T14:00:00",
+                "checkin": None,
+                "checkout": None,
+            },
+        ) as mock_llm:
+            record = _parse_email(email)
+        mock_llm.assert_called_once()
+        assert record["date_parse_ok"] is True
+        assert record["departure"] == "2026-06-01T10:00:00"
+        assert "dates extracted via LLM fallback" in record["parse_warnings"]
+
+    def test_llm_fallback_hotel_applied(self):
+        """LLM fallback applies checkin/checkout for hotel emails."""
+        email = {
+            "subject": "Hotel booking confirmed - Superbude Wien",
+            "body": "Your hotel reservation at Superbude is confirmed.",
+            "messageId": "test-llm-003",
+        }
+        with unittest.mock.patch(
+            "ouro.tools.gmail_flight_scanner._llm_extract_dates",
+            return_value={
+                "departure": None,
+                "arrival": None,
+                "checkin": "2026-06-01",
+                "checkout": "2026-06-05",
+            },
+        ):
+            record = _parse_email(email)
+        assert record["date_parse_ok"] is True
+        assert record["checkin"] == "2026-06-01"
+        assert record["checkout"] == "2026-06-05"
+        assert "dates extracted via LLM fallback" in record["parse_warnings"]
+
+    def test_llm_fallback_failure_leaves_date_parse_ok_false(self):
+        """If LLM fallback returns None, date_parse_ok stays False."""
+        email = {
+            "subject": "Flight confirmation",
+            "body": "Your flight is confirmed.",
+            "messageId": "test-llm-004",
+        }
+        with unittest.mock.patch(
+            "ouro.tools.gmail_flight_scanner._llm_extract_dates",
+            return_value=None,
+        ):
+            record = _parse_email(email)
+        assert record["date_parse_ok"] is False
+        assert "dates extracted via LLM fallback" not in record["parse_warnings"]
+
+    def test_llm_fallback_all_none_keeps_date_parse_ok_false_for_flight(self):
+        """If LLM returns dict with no departure for a flight, date_parse_ok stays False."""
+        email = {
+            "subject": "Flight confirmation",
+            "body": "Your flight is confirmed.",
+            "messageId": "test-llm-005",
+        }
+        with unittest.mock.patch(
+            "ouro.tools.gmail_flight_scanner._llm_extract_dates",
+            return_value={
+                "departure": None,
+                "arrival": None,
+                "checkin": "2026-06-01",
+                "checkout": None,
+            },
+        ):
+            record = _parse_email(email)
+        # Flight type with no departure should still be False
+        assert record["date_parse_ok"] is False
+
+
+class TestReferenceFixtures:
+    """Tests using reference corpus from real booking emails."""
+
+    def test_reference_fixtures_exist(self):
+        """Reference fixture file exists and has entries."""
+        import json
+        import os
+
+        fixture_path = os.path.join(
+            os.path.dirname(__file__), "fixtures", "email_parser_reference.json"
+        )
+        assert os.path.exists(fixture_path), f"Reference fixtures not found: {fixture_path}"
+        data = json.load(open(fixture_path))
+        assert len(data) > 0, "Reference fixtures should not be empty"
+
+    def test_reference_fixtures_structure(self):
+        """Each reference fixture has required fields."""
+        import json
+        import os
+
+        fixture_path = os.path.join(
+            os.path.dirname(__file__), "fixtures", "email_parser_reference.json"
+        )
+        data = json.load(open(fixture_path))
+        required_fields = {"messageId", "booking_type", "subject"}
+        for entry in data:
+            missing = required_fields - set(entry.keys())
+            assert not missing, f"Missing fields {missing} in fixture: {entry.get('messageId')}"
+
+    def test_reference_fixtures_have_travel_types(self):
+        """Reference fixtures include flight/hotel/train booking types."""
+        import json
+        import os
+
+        fixture_path = os.path.join(
+            os.path.dirname(__file__), "fixtures", "email_parser_reference.json"
+        )
+        data = json.load(open(fixture_path))
+        types = {e["booking_type"] for e in data}
+        assert types & {"flight", "hotel", "train"}, (
+            f"Expected at least one travel booking type, got: {types}"
+        )
+
+    def test_vienna_hotel_fixture_present(self):
+        """Vienna hotel (Superbude) fixture is in reference corpus."""
+        import json
+        import os
+
+        fixture_path = os.path.join(
+            os.path.dirname(__file__), "fixtures", "email_parser_reference.json"
+        )
+        data = json.load(open(fixture_path))
+        ids = {e["messageId"] for e in data}
+        # Superbude Wien hotel booking
+        assert "19e3bcb1ed50a085" in ids, "Vienna hotel fixture missing from reference corpus"
+
+    def test_vienna_flight_fixture_present(self):
+        """Vienna flight (Turkish Airlines TBS->VIE) fixture is in reference corpus."""
+        import json
+        import os
+
+        fixture_path = os.path.join(
+            os.path.dirname(__file__), "fixtures", "email_parser_reference.json"
+        )
+        data = json.load(open(fixture_path))
+        ids = {e["messageId"] for e in data}
+        # Turkish Airlines TBS->VIE
+        assert "19e3bbdc5bf3a73f" in ids, "Vienna flight fixture missing from reference corpus"
+

@@ -1,0 +1,336 @@
+[
+  {
+    "messageId": "19e25fca3033d485",
+    "subject": "",
+    "booking_type": "unknown",
+    "date_parse_ok": false,
+    "parse_warnings": [],
+    "expected_departure": "2026-05-27T13:20:00",
+    "expected_arrival": "2026-05-27T17:45:00"
+  },
+  {
+    "messageId": "19e25fd38526b2a6",
+    "subject": "",
+    "booking_type": "unknown",
+    "date_parse_ok": false,
+    "parse_warnings": [],
+    "expected_departure": "2026-05-27T13:20:00",
+    "expected_arrival": "2026-05-27T17:45:00"
+  },
+  {
+    "messageId": "19e3c983bc72f5df",
+    "subject": "Seats Confirmed",
+    "booking_type": "flight",
+    "date_parse_ok": true,
+    "parse_warnings": [
+      "departure date inferred from raw_dates (no label found)"
+    ],
+    "expected_departure": "2026-06-01",
+    "expected_arrival": null
+  },
+  {
+    "messageId": "19e3bcb1ed50a085",
+    "subject": "🛄 Thanks! Your booking is confirmed at Superbude Wien Prater",
+    "booking_type": "hotel",
+    "date_parse_ok": true,
+    "parse_warnings": [
+      "departure date inferred from raw_dates (no label found)"
+    ],
+    "expected_checkin": "2026-06-01",
+    "expected_checkout": "2026-06-05"
+  },
+  {
+    "messageId": "19e3bc06e3a6a8e9",
+    "subject": "Important Information for Your Flight",
+    "booking_type": "flight",
+    "date_parse_ok": true,
+    "parse_warnings": [
+      "departure date inferred from raw_dates (no label found)"
+    ],
+    "expected_departure": "2026-06-01",
+    "expected_arrival": null
+  },
+  {
+    "messageId": "19e3bc02201da2d1",
+    "subject": "🛄 Thanks! Your booking is confirmed at Paragraph Golf & Spa Tabori, Autograph Collection",
+    "booking_type": "hotel",
+    "date_parse_ok": true,
+    "parse_warnings": [
+      "departure date inferred from raw_dates (no label found)"
+    ],
+    "expected_checkin": "2026-05-30",
+    "expected_checkout": null
+  },
+  {
+    "messageId": "19e3bbdc5bf3a73f",
+    "subject": "Flight Booking Confirmed:  Tbilisi - Istanbul, Istanbul - Vienna",
+    "booking_type": "flight",
+    "date_parse_ok": true,
+    "parse_warnings": [
+      "manually corrected"
+    ],
+    "expected_departure": "2026-06-01",
+    "expected_arrival": "2026-06-01"
+  },
+  {
+    "messageId": "19e3acc1ab65d52a",
+    "subject": "Your electronic ticket receipt is ready to MOSCOW DOMODEDOVO, RUSSIA on May 24 for MS SVETLANA LEE",
+    "booking_type": "flight",
+    "date_parse_ok": false,
+    "parse_warnings": [
+      "departure date not found"
+    ],
+    "expected_departure": null,
+    "expected_arrival": null
+  },
+  {
+    "messageId": "19e3acb3d00f2127",
+    "subject": "Your electronic ticket receipt is ready to MOSCOW DOMODEDOVO, RUSSIA on May 24 for MS SVETLANA LEE",
+    "booking_type": "flight",
+    "date_parse_ok": false,
+    "parse_warnings": [
+      "departure date not found"
+    ],
+    "expected_departure": null,
+    "expected_arrival": null
+  },
+  {
+    "messageId": "19e341003cb28732",
+    "subject": "Your electronic ticket receipt is ready to MOSCOW DOMODEDOVO, RUSSIA on May 24 for MS SVETLANA LEE",
+    "booking_type": "flight",
+    "date_parse_ok": false,
+    "parse_warnings": [
+      "departure date not found"
+    ],
+    "expected_departure": null,
+    "expected_arrival": null
+  },
+  {
+    "messageId": "19e318b120cf80f6",
+    "subject": "📈 Unitree drops viral new mecha suit",
+    "booking_type": "train",
+    "date_parse_ok": false,
+    "parse_warnings": [
+      "departure date not found"
+    ],
+    "expected_departure": null,
+    "expected_arrival": null
+  },
+  {
+    "messageId": "19e2bb3bb206eac5",
+    "subject": "ICRA 2026 Newsletter - Program Updates & Conference Highlights",
+    "booking_type": "other",
+    "date_parse_ok": true,
+    "parse_warnings": [],
+    "expected_departure": null,
+    "expected_arrival": null
+  },
+  {
+    "messageId": "19e2b3f4600bb1e7",
+    "subject": "Приглашение: Встреча_ИИ Эдвайзори Виктор Тарнавский - вт, 19 май 2026 14:00 - 14:30 (GMT+2) (victor.tarnavsky@gmail.com)",
+    "booking_type": "other",
+    "date_parse_ok": true,
+    "parse_warnings": [],
+    "expected_departure": null,
+    "expected_arrival": null
+  },
+  {
+    "messageId": "19e28bf9c8eea384",
+    "subject": "Before It's Everywhere, It's on The Information",
+    "booking_type": "other",
+    "date_parse_ok": true,
+    "parse_warnings": [],
+    "expected_departure": null,
+    "expected_arrival": null
+  },
+  {
+    "messageId": "19e28412ebbbcd96",
+    "subject": "🦾 Malware Slips Into OpenAI",
+    "booking_type": "train",
+    "date_parse_ok": false,
+    "parse_warnings": [
+      "departure date not found"
+    ],
+    "expected_departure": null,
+    "expected_arrival": null
+  },
+  {
+    "messageId": "19e274914b666da0",
+    "subject": "The Pulse: Forward deployed engineering heats up again",
+    "booking_type": "train",
+    "date_parse_ok": false,
+    "parse_warnings": [
+      "departure date not found"
+    ],
+    "expected_departure": null,
+    "expected_arrival": null
+  },
+  {
+    "messageId": "19e25fb3f577db89",
+    "subject": "Today: LinkedIn’s new focus",
+    "booking_type": "train",
+    "date_parse_ok": false,
+    "parse_warnings": [
+      "departure date not found"
+    ],
+    "expected_departure": null,
+    "expected_arrival": null
+  },
+  {
+    "messageId": "19e21eb633cffd2c",
+    "subject": "Приглашение: Консультация по ИИ с Виктором Тарнавским - вт, 19 май 2026 16:00 - 17:00 (GMT+2) (victor.tarnavsky@gmail.com)",
+    "booking_type": "other",
+    "date_parse_ok": true,
+    "parse_warnings": [],
+    "expected_departure": null,
+    "expected_arrival": null
+  },
+  {
+    "messageId": "19e2116197d554d7",
+    "subject": "Виктор, ваш билет в Санкт-Петербург успешно оформлен!",
+    "booking_type": "flight",
+    "date_parse_ok": false,
+    "parse_warnings": [
+      "departure date not found"
+    ],
+    "expected_departure": null,
+    "expected_arrival": null
+  },
+  {
+    "messageId": "19e20f39cbfe16a7",
+    "subject": "Виктор, ваш билет в Москву успешно оформлен!",
+    "booking_type": "flight",
+    "date_parse_ok": false,
+    "parse_warnings": [
+      "departure date not found"
+    ],
+    "expected_departure": null,
+    "expected_arrival": null
+  },
+  {
+    "messageId": "19e1d353596572d1",
+    "subject": "Revisiting “No Silver Bullets” in the age of AI",
+    "booking_type": "flight",
+    "date_parse_ok": false,
+    "parse_warnings": [
+      "departure date not found"
+    ],
+    "expected_departure": null,
+    "expected_arrival": null
+  },
+  {
+    "messageId": "19e41f05cff50e16",
+    "subject": "Your electronic ticket receipt is ready to MOSCOW DOMODEDOVO, RUSSIA on May 24 for MS SVETLANA LEE",
+    "booking_type": "flight",
+    "date_parse_ok": false,
+    "parse_warnings": [
+      "departure date not found"
+    ],
+    "expected_departure": null,
+    "expected_arrival": null
+  },
+  {
+    "messageId": "19e4661ede3efb27",
+    "subject": "Your Opinion Matters To Us",
+    "booking_type": "flight",
+    "date_parse_ok": false,
+    "parse_warnings": [
+      "departure date not found"
+    ],
+    "expected_departure": null,
+    "expected_arrival": null
+  },
+  {
+    "messageId": "19e47488e3690e6d",
+    "subject": "🦾 OpenAI Preps $1 Trillion IPO",
+    "booking_type": "other",
+    "date_parse_ok": true,
+    "parse_warnings": [],
+    "expected_departure": null,
+    "expected_arrival": null
+  },
+  {
+    "messageId": "19e4afe410ab12d7",
+    "subject": "Узнайте тайны метро",
+    "booking_type": "other",
+    "date_parse_ok": true,
+    "parse_warnings": [],
+    "expected_departure": null,
+    "expected_arrival": null
+  },
+  {
+    "messageId": "19e4aa65088d9ddf",
+    "subject": "Dehancer 6.2 for iOS",
+    "booking_type": "hotel",
+    "date_parse_ok": false,
+    "parse_warnings": [
+      "checkin date not found"
+    ],
+    "expected_checkin": null,
+    "expected_checkout": null
+  },
+  {
+    "messageId": "19e4aa51ce089a43",
+    "subject": "📈 Meet the autonomous growth agent",
+    "booking_type": "train",
+    "date_parse_ok": false,
+    "parse_warnings": [
+      "departure date not found"
+    ],
+    "expected_departure": null,
+    "expected_arrival": null
+  },
+  {
+    "messageId": "19e5007844c76144",
+    "subject": "⏰ Up to 10% off expires soon",
+    "booking_type": "other",
+    "date_parse_ok": true,
+    "parse_warnings": [],
+    "expected_departure": null,
+    "expected_arrival": null
+  },
+  {
+    "messageId": "19e4fc3bc1460d2c",
+    "subject": "🦞 New Human Tax",
+    "booking_type": "hotel",
+    "date_parse_ok": false,
+    "parse_warnings": [
+      "checkin date not found"
+    ],
+    "expected_checkin": null,
+    "expected_checkout": null
+  },
+  {
+    "messageId": "19e4fb535753d947",
+    "subject": "Без ожидания у кассы",
+    "booking_type": "train",
+    "date_parse_ok": false,
+    "parse_warnings": [
+      "departure date not found"
+    ],
+    "expected_departure": null,
+    "expected_arrival": null
+  },
+  {
+    "messageId": "19e503eb4bfac758",
+    "subject": "Why the Biggest Threat to Robotics Isn’t Technical",
+    "booking_type": "flight",
+    "date_parse_ok": false,
+    "parse_warnings": [
+      "departure date not found"
+    ],
+    "expected_departure": null,
+    "expected_arrival": null
+  },
+  {
+    "messageId": "19e546680e311b2a",
+    "subject": "Today: Quitting quiet luxury",
+    "booking_type": "flight",
+    "date_parse_ok": false,
+    "parse_warnings": [
+      "departure date not found"
+    ],
+    "expected_departure": null,
+    "expected_arrival": null
+  }
+]

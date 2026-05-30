@@ -330,6 +330,31 @@ def _parse_email(email: dict) -> dict:
     else:
         date_parse_ok = True
 
+    # LLM fallback: if regex parsing failed, try LLM extraction
+    if not date_parse_ok and body:
+        llm_dates = _llm_extract_dates(subject, body)
+        if llm_dates:
+            if booking_type in ("flight", "train"):
+                if llm_dates.get("departure"):
+                    departure = llm_dates["departure"]
+                    arrival = llm_dates.get("arrival")
+                    date_parse_ok = True
+                    parse_warnings.append("dates extracted via LLM fallback")
+            elif booking_type == "hotel":
+                if llm_dates.get("checkin"):
+                    checkin = llm_dates["checkin"]
+                    checkout = llm_dates.get("checkout")
+                    date_parse_ok = True
+                    parse_warnings.append("dates extracted via LLM fallback")
+            else:
+                if llm_dates.get("departure") or llm_dates.get("checkin"):
+                    departure = llm_dates.get("departure")
+                    arrival = llm_dates.get("arrival")
+                    checkin = llm_dates.get("checkin")
+                    checkout = llm_dates.get("checkout")
+                    date_parse_ok = True
+                    parse_warnings.append("dates extracted via LLM fallback")
+
     record: dict[str, Any] = {
         "messageId": message_id,
         "type": booking_type,
@@ -370,6 +395,75 @@ def _parse_email(email: dict) -> dict:
 
     return record
 
+
+
+# ---------------------------------------------------------------------------
+# LLM date extraction fallback
+# ---------------------------------------------------------------------------
+
+LLM_DATE_EXTRACT_MODEL = "google/gemini-flash-1.5"
+LLM_DATE_EXTRACT_MAX_CHARS = 2000
+
+
+def _llm_extract_dates(subject: str, body: str) -> Optional[dict]:
+    """
+    Call a cheap LLM to extract travel dates when regex parsing failed.
+    Returns dict with keys: departure, arrival, checkin, checkout (ISO or None).
+    Returns None if call fails.
+    """
+    import requests as _requests
+
+    api_key = os.environ.get("OPENROUTER_API_KEY", "")
+    if not api_key:
+        log.warning("gmail_flight_scanner: OPENROUTER_API_KEY not set, skipping LLM fallback")
+        return None
+
+    body_snippet = body[:LLM_DATE_EXTRACT_MAX_CHARS]
+    body_snippet = body[:LLM_DATE_EXTRACT_MAX_CHARS]
+    prompt = (
+        "Extract travel dates from this booking email. "
+        "Return ONLY a JSON object with keys: departure, arrival, checkin, checkout. "
+        "Values must be ISO 8601 dates (YYYY-MM-DD or YYYY-MM-DDTHH:MM:SS) or null. "
+        "Do not include any explanation or markdown. Only the JSON object.\n\n"
+        f"Subject: {subject}\n\nBody:\n{body_snippet}"
+    )
+
+    payload = {
+        "model": LLM_DATE_EXTRACT_MODEL,
+        "messages": [{"role": "user", "content": prompt}],
+        "max_tokens": 200,
+        "temperature": 0,
+    }
+    headers = {
+        "Authorization": f"Bearer {api_key}",
+        "Content-Type": "application/json",
+    }
+
+    try:
+        resp = _requests.post(
+            "https://openrouter.ai/api/v1/chat/completions",
+            json=payload,
+            headers=headers,
+            timeout=15,
+        )
+        resp.raise_for_status()
+        raw = resp.json()["choices"][0]["message"]["content"].strip()
+        # Strip markdown code fences if present
+        if raw.startswith("```"):
+            raw = raw.split("\n", 1)[-1].rsplit("```", 1)[0].strip()
+        result = json.loads(raw)
+        # Validate — must be a dict with at least some keys
+        if not isinstance(result, dict):
+            return None
+        # Normalize: keep only the four keys, convert empty strings to None
+        out = {}
+        for key in ("departure", "arrival", "checkin", "checkout"):
+            val = result.get(key)
+            out[key] = val if val and str(val).strip() else None
+        return out
+    except Exception as exc:
+        log.warning("gmail_flight_scanner: LLM date fallback failed: %s", exc)
+        return None
 
 # ---------------------------------------------------------------------------
 # Notification helper
