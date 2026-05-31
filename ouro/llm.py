@@ -121,6 +121,9 @@ _MODEL_PRICING_STATIC = {
     "openai/gpt-4.1": (2.0, 0.50, 8.0),
     "openai/gpt-5.2": (1.75, 0.175, 14.0),
     "openai/gpt-5.2-codex": (1.75, 0.175, 14.0),
+    "google/gemini-2.5-flash": (0.30, 0.030, 2.50),  # Default model - 10x cheaper than claude-sonnet
+    "google/gemini-2.5-flash-preview-05-20": (0.30, 0.030, 2.50),
+    "google/gemini-2.0-flash-001": (0.10, 0.010, 0.40),  # Light model
     "google/gemini-2.5-pro-preview": (1.25, 0.125, 10.0),
     "google/gemini-3-pro-preview": (2.0, 0.20, 12.0),
     "x-ai/grok-3-mini": (0.30, 0.03, 0.50),
@@ -473,7 +476,7 @@ class LLMClient:
 
     def default_model(self) -> str:
         """Return the single default model from env. LLM switches via tool if needed."""
-        return os.environ.get("OURO_MODEL", "anthropic/claude-sonnet-4.6")
+        return os.environ.get("OURO_MODEL", "google/gemini-2.5-flash")
 
     def light_model(self) -> str:
         """Return the light/cheap model (for cron tasks, consciousness, etc.)."""
@@ -482,7 +485,7 @@ class LLMClient:
 
     def available_models(self) -> List[str]:
         """Return list of available models from env (for switch_model tool schema)."""
-        main = os.environ.get("OURO_MODEL", "anthropic/claude-sonnet-4.6")
+        main = os.environ.get("OURO_MODEL", "google/gemini-2.5-flash")
         code = os.environ.get("OURO_MODEL_CODE", "")
         light = os.environ.get("OURO_MODEL_LIGHT", "")
         models = [main]

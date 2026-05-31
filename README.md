@@ -242,6 +242,13 @@ Lessons accumulated through real operation — what broke, what fixed it.
 
 ## Changelog
 
+### v1.3.0 — 2026-05-31
+- Default model switched from `claude-sonnet-4.6` to `google/gemini-2.5-flash`
+- 10x cheaper on input ($0.30 vs $3.00/M tokens), 6x cheaper on output ($2.50 vs $15.00/M tokens)
+- Added gemini-2.5-flash to static pricing table in llm.py
+- .env OURO_MODEL set explicitly; hardcoded fallback in llm.py updated
+- Cron tasks already on gemini-2.0-flash-001; this affects main worker tasks
+
 ### v1.2.0 — 2026-05-30
 - BIBLE.md §8: added "Quality before optimization" principle — correctness is the primary constraint; LLM calls permitted when needed for accuracy; data-critical components require reference test corpora
 
