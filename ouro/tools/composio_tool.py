@@ -88,7 +88,7 @@ def _list_connections(ctx: ToolContext, entity_id: str = "default") -> str:
         client = _get_client()
         # v2 API: connected_accounts resource; entity_id filters by user/entity.
         # .list() returns a list of ConnectedAccount model objects.
-        connections = client.connected_accounts.list(entity_id=entity_id)
+        connections = client.connected_accounts.list()
         if not connections:
             return "No apps connected. Use composio_get_oauth_url to connect an app."
         items = []
