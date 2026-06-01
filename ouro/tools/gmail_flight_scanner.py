@@ -128,12 +128,12 @@ def _format_record(r: dict) -> str:
 def _fetch_emails_via_composio() -> list[dict]:
     """Call GMAIL_FETCH_EMAILS via Composio. Returns list of email dicts."""
     try:
-        from composio import ComposioToolSet, Action
+        from composio import Composio  # type: ignore[import]
         api_key = os.environ.get("COMPOSIO_API_KEY", "")
         if not api_key:
             log.warning("gmail_flight_scanner: COMPOSIO_API_KEY not set")
             return []
-        toolset = ComposioToolSet(api_key=api_key)
+        client = Composio(api_key=api_key)
         import random as _rand
         import time as _time
 
@@ -141,8 +141,8 @@ def _fetch_emails_via_composio() -> list[dict]:
         last_exc = None
         for attempt in range(1, 4):
             try:
-                result = toolset.execute_action(
-                    action=Action("GMAIL_FETCH_EMAILS"),
+                result = client.actions.execute(
+                    action_name="GMAIL_FETCH_EMAILS",
                     params={"query": GMAIL_QUERY, "max_results": 50},
                     entity_id="default",
                 )
@@ -159,6 +159,9 @@ def _fetch_emails_via_composio() -> list[dict]:
                     _time.sleep(delay)
                 else:
                     raise last_exc
+        # Normalise result: Pydantic v2 models expose model_dump(), plain dicts pass through.
+        if hasattr(result, "model_dump"):
+            result = result.model_dump()
         if isinstance(result, dict):
             # Check result["data"] first — Composio wraps payload there
             data_val = result.get("data")
