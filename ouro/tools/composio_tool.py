@@ -82,7 +82,7 @@ def _gh_issue_create(ctx: ToolContext, title: str, body: str, labels: str = "") 
 # Tool handlers
 # ---------------------------------------------------------------------------
 
-def _list_connections(ctx: ToolContext, entity_id: str = "default") -> str:
+def _list_connections(ctx: ToolContext) -> str:
     """List all active Composio app connections for the entity."""
     try:
         client = _get_client()
@@ -205,8 +205,6 @@ def get_tools() -> List[ToolEntry]:
                 "Shows which external apps are authorized and available for use."
             ),
             "parameters": {"type": "object", "properties": {
-                "entity_id": {"type": "string", "default": "default",
-                              "description": "Composio entity ID (default for single-user)"},
             }, "required": []},
         }, _list_connections),
 
