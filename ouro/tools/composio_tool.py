@@ -16,25 +16,35 @@ log = logging.getLogger(__name__)
 # ---------------------------------------------------------------------------
 # Lazy-init singleton (thread-safe)
 # ---------------------------------------------------------------------------
+#
+# MIGRATION NOTE (composio-core >= 0.6.x):
+#   The old `ComposioToolSet` class was removed from the top-level `composio`
+#   namespace. The library now exposes a unified `Composio` REST client that
+#   uses resource-oriented sub-clients (.connected_accounts, .actions, etc.).
+#   The entity/enum pattern (App enum, Action enum, entity.get_connections())
+#   was tied to v1 API endpoints which returned HTTP 410 Gone — they have been
+#   removed from the backend.  We now call the v2 REST resources directly.
 
-_toolset = None
-_toolset_lock = threading.Lock()
+_client = None
+_client_lock = threading.Lock()
 
 
-def _get_toolset():
-    """Return cached ComposioToolSet. Thread-safe lazy init, reads current env key."""
-    global _toolset
+def _get_client():
+    """Return cached Composio client. Thread-safe lazy init, reads current env key."""
+    global _client
     api_key = os.environ.get("COMPOSIO_API_KEY")
     if not api_key or not api_key.strip():
         raise RuntimeError(
             "COMPOSIO_API_KEY not set. Get your key at https://composio.dev and add it to .env"
         )
-    if _toolset is None:
-        with _toolset_lock:
-            if _toolset is None:
-                from composio import ComposioToolSet
-                _toolset = ComposioToolSet(api_key=api_key)
-    return _toolset
+    if _client is None:
+        with _client_lock:
+            if _client is None:
+                # composio-core >= 0.6: top-level Composio client replaces ComposioToolSet.
+                # If this import also fails, try: from composio.client import Composio
+                from composio import Composio  # type: ignore[import]
+                _client = Composio(api_key=api_key)
+    return _client
 
 
 # ---------------------------------------------------------------------------
@@ -75,15 +85,17 @@ def _gh_issue_create(ctx: ToolContext, title: str, body: str, labels: str = "") 
 def _list_connections(ctx: ToolContext, entity_id: str = "default") -> str:
     """List all active Composio app connections for the entity."""
     try:
-        toolset = _get_toolset()
-        entity = toolset.get_entity(id=entity_id)
-        connections = entity.get_connections()
+        client = _get_client()
+        # v2 API: connected_accounts resource; entity_id filters by user/entity.
+        # .list() returns a list of ConnectedAccount model objects.
+        connections = client.connected_accounts.list(entity_id=entity_id)
         if not connections:
             return "No apps connected. Use composio_get_oauth_url to connect an app."
         items = []
         for conn in connections:
             items.append({
-                "app": getattr(conn, "appUniqueId", str(conn)),
+                # Field names follow snake_case in the v2 SDK models.
+                "app": getattr(conn, "app_unique_id", None) or getattr(conn, "appUniqueId", str(conn)),
                 "status": getattr(conn, "status", "unknown"),
                 "id": getattr(conn, "id", ""),
             })
@@ -97,16 +109,16 @@ def _list_connections(ctx: ToolContext, entity_id: str = "default") -> str:
 def _get_oauth_url(ctx: ToolContext, app: str, entity_id: str = "default") -> str:
     """Generate OAuth URL to connect a new app."""
     try:
-        toolset = _get_toolset()
-        entity = toolset.get_entity(id=entity_id)
-        # Composio App enum uses uppercase names
-        from composio import App
-        try:
-            app_enum = App(app.upper())
-        except (ValueError, KeyError):
-            app_enum = app.upper()
-        request = entity.initiate_connection(app=app_enum)
-        url = getattr(request, "redirectUrl", None) or getattr(request, "redirect_url", None)
+        client = _get_client()
+        # v2 API: initiate a new connected account for the given app.
+        # app_name must be uppercase (e.g. "GMAIL", "GITHUB").
+        # The App/enum pattern is gone; pass the string name directly.
+        request = client.connected_accounts.initiate(
+            app_name=app.upper(),
+            entity_id=entity_id,
+        )
+        # v2 model uses redirect_url (snake_case); fall back to camelCase just in case.
+        url = getattr(request, "redirect_url", None) or getattr(request, "redirectUrl", None)
         if url:
             return f"OK: Open this URL to authorize {app}:\n{url}"
         return f"OK: Connection initiated for {app}. Check Composio dashboard for status."
@@ -126,18 +138,18 @@ def _run_action(ctx: ToolContext, action: str, params: Optional[Dict[str, Any]] 
                 entity_id: str = "default") -> str:
     """Execute a Composio action (e.g. GMAIL_FETCH_EMAILS, GITHUB_LIST_ISSUES)."""
     try:
-        toolset = _get_toolset()
-        from composio import Action
-        try:
-            action_enum = Action(action.upper())
-        except (ValueError, KeyError):
-            action_enum = action.upper()
-        result = toolset.execute_action(
-            action=action_enum,
+        client = _get_client()
+        # v2 API: actions.execute() accepts action name as a plain string.
+        # The Action enum is no longer required; uppercase string names work directly.
+        result = client.actions.execute(
+            action_name=action.upper(),
             params=params or {},
             entity_id=entity_id,
         )
-        # Result is usually a dict
+        # Result is a dict-like response model; serialize for display.
+        if hasattr(result, "model_dump"):
+            # Pydantic v2 model
+            return json.dumps(result.model_dump(), indent=2, default=str)
         if isinstance(result, dict):
             return json.dumps(result, indent=2, default=str)
         return str(result)
