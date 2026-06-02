@@ -242,7 +242,8 @@ Lessons accumulated through real operation — what broke, what fixed it.
 
 ## Changelog
 
-### v1.3.0 — 2026-05-31
+### v7.3.0 — 2026-06-02
+- Version sync: Fixed VERSION file and README.md to match latest git tag.
 - Default model switched from `claude-sonnet-4.6` to `google/gemini-2.5-flash`
 - 10x cheaper on input ($0.30 vs $3.00/M tokens), 6x cheaper on output ($2.50 vs $15.00/M tokens)
 - Added gemini-2.5-flash to static pricing table in llm.py
